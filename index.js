@@ -12,10 +12,12 @@ const player=$('.player')
 const progress=$('.progress')
 const nextBtn=$('.btn-next')
 const prevBtn=$('.btn-prev')
+const randomBtn=$('.btn-random')
 //const playlist = $('.playlist')
 const app = {
     currentIndex:0,
     isPlaying:false,
+    isRandom:false,
     songs: [
         {
             name: "Tháng 1 của anh",
@@ -156,12 +158,35 @@ const app = {
         }
         //khi next song
         nextBtn.onclick=function(){
-            _this.nextSong()
-            audio.play()
+            if(_this.isRandom){
+                _this.randomSong()
+                audio.play()
+            }else{
+                _this.nextSong()
+                audio.play()
+            }
+            
+            
         }
         prevBtn.onclick=function(){
-            _this.prevSong()
-            audio.play()
+            if(_this.isRandom){
+                _this.randomSong()
+                audio.play()
+            }else{
+                _this.nextSong()
+                audio.play()
+            }
+            
+        }
+        //khi click random
+        randomBtn.onclick=function(e){
+            _this.isRandom= !_this.isRandom
+            randomBtn.classList.toggle('active', _this.isRandom)
+
+        }
+        //xu ly next song khi audio ended
+        audio.onended=function(){
+            
         }
     }
     ,
@@ -187,6 +212,16 @@ const app = {
             this.currentIndex=this.songs.length-1
         }
         this.loadCurrentSong()
+    }
+    ,
+    randomSong(){
+        let newIndex;
+        do{
+            newIndex=Math.floor(Math.random()*this.songs.length)
+        }while(newIndex===this.currentIndex){
+            this.currentIndex=newIndex
+            this.loadCurrentSong()
+        }
     }
     ,
     start:function(){
