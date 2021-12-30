@@ -147,7 +147,6 @@
   .song.active {
     background-color: var(--primary-color);
   }
-  
   .song:active {
     opacity: 0.8;
   }

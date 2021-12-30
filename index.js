@@ -13,67 +13,80 @@ const progress=$('.progress')
 const nextBtn=$('.btn-next')
 const prevBtn=$('.btn-prev')
 const randomBtn=$('.btn-random')
+const repeatBtn=$('.btn-repeat')
+const playlist=$('.playlist')
+const PLAYER_STORAGE_KEY='Vinh'
 //const playlist = $('.playlist')
 const app = {
     currentIndex:0,
     isPlaying:false,
     isRandom:false,
+    isRepeat:false,
+    //config:JSON.parse(localStorage.getItem(PLAYER_STORAGE_KEY))||{}
+    config:  {},
     songs: [
         {
             name: "Tháng 1 của anh",
             singer: "Khói",
             //path: "http://hi5.1980s.fm/;",
             path:"music/Thang-1-Cua-Anh-Khoi.mp3",
-            image: "https://i.ytimg.com/vi/jTLhQf5KJSc/maxresdefault.jpg"
+            image: "https://static2.yan.vn/YanNews/202012/202012170248422078-3c50e436-2eee-4666-b87e-93460a35ab65.png"
         },
         {
             name: "Bệnh của anh",
             singer: "Khói",
             path: "music/Benh-Cua-Anh-Khoi.mp3",
             image:
-                "https://1.bp.blogspot.com/-kX21dGUuTdM/X85ij1SBeEI/AAAAAAAAKK4/feboCtDKkls19cZw3glZWRdJ6J8alCm-gCNcBGAsYHQ/s16000/Tu%2BAana%2BPhir%2BSe%2BRap%2BSong%2BLyrics%2BBy%2BRaftaar.jpg"
+                "https://static2.yan.vn/YanNews/202012/202012170248422078-3c50e436-2eee-4666-b87e-93460a35ab65.png"
         },
         {
             name: "25",
             singer: "Táo, Masew",
             path:
                 "music/25-Masew-Mix-Tao-Masew.mp3",
-            image: "https://i.ytimg.com/vi/QvswgfLDuPg/maxresdefault.jpg"
+            image: "https://static2.yan.vn/YanNews/202012/202012170248422078-3c50e436-2eee-4666-b87e-93460a35ab65.png"
         },
         {
-            name: "Mantoiyat",
-            singer: "Raftaar x Nawazuddin Siddiqui",
-            path: "https://mp3.vlcmusic.com/download.php?track_id=14448&format=320",
+            name: "Tháng 7 của anh",
+            singer: "Khói",
+            path: "music/Thang-7-Cua-Anh-Masew-Mix-Khoi-Masew.mp3",
             image:
-                "https://a10.gaanacdn.com/images/song/39/24225939/crop_480x480_1536749130.jpg"
+                "hhttps://static2.yan.vn/YanNews/202012/202012170248422078-3c50e436-2eee-4666-b87e-93460a35ab65.png"
         },
         {
-            name: "Aage Chal",
-            singer: "Raftaar",
-            path: "https://mp3.vlcmusic.com/download.php?track_id=25791&format=320",
+            name: "Như ngày đó",
+            singer: "Binz, Khói",
+            path: "music/Nhu-Ngay-Do-Binz-Khoi-ItsLee.mp3",
             image:
-                "https://a10.gaanacdn.com/images/albums/72/3019572/crop_480x480_3019572.jpg"
+                "https://static2.yan.vn/YanNews/202012/202012170248422078-3c50e436-2eee-4666-b87e-93460a35ab65.png"
         },
         {
-            name: "Damn",
-            singer: "Raftaar x kr$na",
+            name: "Rời xa",
+            singer: "Binz, Khói",
             path:
-                "https://mp3.filmisongs.com/go.php?id=Damn%20Song%20Raftaar%20Ft%20KrSNa.mp3",
+                "music/Roi-Xa-Binz-ItsLee-Khoi.mp3",
             image:
-                "https://nguoi-noi-tieng.com/photo/tieu-su-ca-si-khoi-9807.jpg"
+                "https://static2.yan.vn/YanNews/202012/202012170248422078-3c50e436-2eee-4666-b87e-93460a35ab65.png"
         },
         {
-            name: "Feeling You",
-            singer: "Raftaar x Harjas",
-            path: "https://mp3.vlcmusic.com/download.php?track_id=27145&format=320",
+            name: "Tài liệu không có tiêu đề",
+            singer: "Khói",
+            path: "music/NgheNhacMp3.Org - Tài Liệu Không Có Tiêu Đề.mp3",
             image:
-                "https://a10.gaanacdn.com/gn_img/albums/YoEWlabzXB/oEWlj5gYKz/size_xxl_1586752323.webp"
+                "https://static2.yan.vn/YanNews/202012/202012170248422078-3c50e436-2eee-4666-b87e-93460a35ab65.png"
         }
     ],
+    setConfig:function(key,value){
+        this.config[key] = value
+        localStorage.setItem(PLAYER_STORAGE_KEY,JSON.stringify(this.config))
+        //localStorage.setItem(PLAYER_STORAGE_KEY,JSON.stringify(this.config))
+        //localStorage.setItem(PLAYER_STORAGE_KEY,this.config)
+    }
+    ,
     render: function(){
-        const htmls=this.songs.map(song=>{
+        const htmls=this.songs.map((song,index)=>{
             return `
-            <div class="song">
+            <div class="song ${index===this.currentIndex ? 'active':''}" data-index="${index}">
             <div class="thumb"
                 style="background-image: url('${song.image}')">
             </div>
@@ -87,7 +100,7 @@ const app = {
         </div>
             `
         })
-        $('.playlist').innerHTML=htmls.join('')
+        playlist.innerHTML = htmls.join("");
     }
     ,
     defineProperties:function(){
@@ -96,6 +109,7 @@ const app = {
                 return this.songs[this.currentIndex]
             }
         })
+
     }
     ,
     handleEvent:function(){
@@ -144,7 +158,7 @@ const app = {
         //khi tiến độ bài hát thay đổi
         audio.ontimeupdate=function(){
             if(audio.duration){
-                const progressPercent=Math.floor((audio.duration/audio.currentTime ) * 100)
+                const progressPercent= Math.floor((audio.currentTime / audio.duration) * 100)
                 progress.value=progressPercent
 
             }
@@ -160,42 +174,80 @@ const app = {
         nextBtn.onclick=function(){
             if(_this.isRandom){
                 _this.randomSong()
-                audio.play()
+                //audio.play()
             }else{
                 _this.nextSong()
-                audio.play()
+                
             }
+            audio.play()
+            _this.render()
+            _this.scrollActiveSong()
             
             
         }
         prevBtn.onclick=function(){
             if(_this.isRandom){
                 _this.randomSong()
-                audio.play()
+                //audio.play()
             }else{
                 _this.nextSong()
-                audio.play()
+                //audio.play()
             }
+            audio.play()
+            _this.scrollActiveSong()
             
         }
         //khi click random
         randomBtn.onclick=function(e){
             _this.isRandom= !_this.isRandom
+            //_this.setConfig('isRandom',_this.isRandom)
             randomBtn.classList.toggle('active', _this.isRandom)
 
         }
-        //xu ly next song khi audio ended
-        audio.onended=function(){
+        //lap bai hat
+        repeatBtn.onclick=function(e){
+            _this.isRepeat=!_this.isRepeat
+           // _this.setConfig('isRepeat',_this.isRepeat)
+            repeatBtn.classList.toggle('active', _this.isRepeat)
             
         }
+        //xu ly next song khi audio ended
+        audio.onended=function(){
+            if(_this.isRepeat){
+                audio.play()
+            }else{
+                nextBtn.click()
+            }
+            
+        }
+        //lang nghe hanh vi click vao playlist c
+        playlist.onclick=function(e){
+            const songNode=e.target.closest(".song:not(.active)")
+            //xu ly khi click vao song
+            if(songNode||!e.target.closest('.option')){
+                if(songNode){
+                    _this.currentIndex=Number(songNode.dataset.index)
+                    _this.loadCurrentSong()
+                    _this.render()
+                    audio.play()
+                    
+                }
+
+                if(e.target.closest('.option')){
+
+                }
+
+            }
+
+            //xu ly khi click vao option
+        }
+
     }
     ,
     loadCurrentSong(){
-
-        heading.textContent = this.currentSong.name
-        cdThumb.style.backgroundImange=`url('${this.currentSong.image}')`
-        audio.src=this.currentSong.path
-        console.log(heading,cdThumb,audio)
+        heading.textContent = this.currentSong.name;
+           cdThumb.style.backgroundImage = `url('${this.currentSong.image}')`;
+        audio.src = this.currentSong.path;
     }
     ,
     nextSong(){
@@ -204,6 +256,11 @@ const app = {
             this.currentIndex=0
         }
         this.loadCurrentSong()
+    }
+    ,
+    loadConfig(){
+        this.isRandom=this.config.isRandom
+        this.isRepeat=this.config.isRepeat
     }
     ,
     prevSong(){
@@ -224,7 +281,32 @@ const app = {
         }
     }
     ,
+    scrollActiveSong(){
+
+        if(this.currentIndex===this.songs[0] ||this.currentIndex===this.songs[1]||this.currentIndex===this.songs[2])
+        {
+            setTimeout(function(){
+                $('.song.active').scrollIntoView({
+                    behavior:'smooth',
+                    block:'nearest'
+                })
+            },300)
+        }else{
+            setTimeout(function(){
+                $('.song.active').scrollIntoView({
+                    behavior:'smooth',
+                    block:'center'
+                })
+            },500)
+        }
+
+
+
+    }
+    ,
     start:function(){
+        //load cau hinh
+        this.loadConfig()
         //Định nghĩa thuộc tính cho Object
         this.defineProperties()
         //Lắng nghe, xử lý các sự kiên
@@ -233,6 +315,10 @@ const app = {
         this.loadCurrentSong()
         //render lại playlist
         this.render()
+
+        //hienthi trang thai ban dau cua button repeat va random
+        repeatBtn.classList.toggle('active', this.isRepeat)
+        randomBtn.classList.toggle('active', this.isRandom)
     }
     
 }
